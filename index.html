@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Adi OOO Catch-up · Gilad</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: #171a21;
+      --panel-2: #1d222b;
+      --border: #2a3140;
+      --text: #e8eaef;
+      --muted: #9aa3b2;
+      --faint: #6b7385;
+      --accent: #6c7cff;
+      --accent-soft: rgba(108, 124, 255, 0.14);
+      --green: #3dd68c;
+      --green-soft: rgba(61, 214, 140, 0.12);
+      --yellow: #f0c14a;
+      --yellow-soft: rgba(240, 193, 74, 0.12);
+      --red: #ff6b7a;
+      --red-soft: rgba(255, 107, 122, 0.12);
+      --radius: 14px;
+      --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+      --font: "Poppins", system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(1200px 600px at 10% -10%, rgba(108, 124, 255, 0.18), transparent 55%),
+        radial-gradient(900px 500px at 100% 0%, rgba(61, 214, 140, 0.08), transparent 45%),
+        var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    .shell {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 28px 20px 48px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    header.top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .eyebrow {
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin: 0 0 6px;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: var(--font);
+      font-weight: 600;
+      font-size: clamp(28px, 4vw, 40px);
+      line-height: 1.15;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 14px;
+      margin: 8px 0 0;
+    }
+
+    .hint {
+      color: var(--faint);
+      font-size: 13px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 8px 14px;
+      white-space: nowrap;
+    }
+    .hint kbd {
+      display: inline-block;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1px 6px;
+      font-size: 12px;
+      margin: 0 2px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 16px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    @media (max-width: 820px) {
+      .layout { grid-template-columns: 1fr; }
+      nav.subjects { display: flex; overflow-x: auto; gap: 8px; padding-bottom: 4px; }
+      nav.subjects button { white-space: nowrap; flex: 0 0 auto; }
+    }
+
+    nav.subjects {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      height: fit-content;
+      position: sticky;
+      top: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    nav.subjects button {
+      appearance: none;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      text-align: left;
+      padding: 10px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background 0.15s, color 0.15s;
+    }
+    nav.subjects button:hover { background: var(--panel-2); color: var(--text); }
+    nav.subjects button.active {
+      background: var(--accent-soft);
+      color: var(--text);
+      box-shadow: inset 0 0 0 1px rgba(108, 124, 255, 0.35);
+    }
+    nav.subjects button .num {
+      display: inline-block;
+      width: 1.5em;
+      color: var(--faint);
+      font-variant-numeric: tabular-nums;
+    }
+    nav.subjects button.active .num { color: var(--accent); }
+
+    main.panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 28px 30px 24px;
+      min-height: 520px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .subject { display: none; animation: fade 0.18s ease; }
+    .subject.active { display: block; }
+
+    @keyframes fade {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .subject .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+      background: var(--accent-soft);
+      border-radius: 999px;
+      padding: 4px 10px;
+      margin-bottom: 12px;
+    }
+
+    .subject h2 {
+      margin: 0 0 8px;
+      font-family: var(--font);
+      font-weight: 600;
+      font-size: clamp(26px, 3.2vw, 34px);
+      line-height: 1.2;
+    }
+
+    .subject .lede {
+      color: var(--muted);
+      margin: 0 0 22px;
+      font-size: 15px;
+      max-width: 62ch;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 700px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 16px 14px;
+    }
+    .card h3 {
+      margin: 0 0 10px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+    }
+    .card ul, .subject > ul {
+      margin: 0;
+      padding-left: 1.15em;
+    }
+    .card li, .subject li {
+      margin: 0 0 8px;
+      color: var(--text);
+    }
+    .card li:last-child { margin-bottom: 0; }
+
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    @media (max-width: 700px) {
+      .stat-row { grid-template-columns: 1fr; }
+    }
+    .stat {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .stat .val {
+      font-family: var(--font);
+      font-weight: 600;
+      font-size: 32px;
+      line-height: 1.1;
+      color: var(--green);
+    }
+    .stat .lbl {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .ask {
+      margin-top: 18px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      background: var(--yellow-soft);
+      border: 1px solid rgba(240, 193, 74, 0.28);
+    }
+    .ask strong { color: var(--yellow); font-size: 12px; letter-spacing: 0.03em; }
+    .ask p { margin: 6px 0 0; }
+
+    .pill {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 999px;
+      padding: 2px 8px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    .pill.done { background: var(--green-soft); color: var(--green); }
+    .pill.kill { background: var(--red-soft); color: var(--red); }
+    .pill.open { background: var(--yellow-soft); color: var(--yellow); }
+
+    .footer-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+      padding-top: 22px;
+      border-top: 1px solid var(--border);
+      gap: 12px;
+    }
+    .footer-nav button {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: var(--panel-2);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .footer-nav button:hover { border-color: var(--accent); }
+    .footer-nav button:disabled {
+      opacity: 0.35;
+      cursor: default;
+      border-color: var(--border);
+    }
+    .progress {
+      color: var(--faint);
+      font-size: 13px;
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="top">
+      <div>
+        <p class="eyebrow">Funnel catch-up for Adi</p>
+        <h1>What moved while you were OOO</h1>
+        <p class="meta">Gilad · Mid-Aug → Sep 17, 2026 · Switch subjects with arrows</p>
+      </div>
+      <div class="hint">Use <kbd>←</kbd> <kbd>→</kbd> or click a subject</div>
+    </header>
+
+    <div class="layout">
+      <nav class="subjects" id="nav" aria-label="Subjects"></nav>
+
+      <main class="panel" id="panel">
+        <!-- 0 Overview -->
+        <section class="subject active" data-id="overview">
+          <span class="tag">Overview</span>
+          <h2>Airtable ate most of my capacity</h2>
+          <p class="lede">CS volume drop + Airtable campaign were the main load. Agents (Eva + no-touch) moving in parallel. Airtable now in maintenance. FDE handed to Deborah.</p>
+          <div class="grid-2">
+            <div class="card">
+              <h3>Primary stacks</h3>
+              <ul>
+                <li>Contact Sales volume drop (investigation)</li>
+                <li>Airtable compete ops (maintenance)</li>
+                <li>CRM Migrations (monday CRM transition)</li>
+                <li>No-touch 1:1 Agent (POC)</li>
+                <li>Eva for Elevate (Oct 28)</li>
+                <li>Mid-Funnel: APJ private-email signup distribution</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>Fresh this week</h3>
+              <ul>
+                <li><strong>Sep 15</strong> — CRM lead-flow leadership deck (Eran / Roy / Ari / Yaron)</li>
+                <li><strong>Sep 17</strong> — APJ: one-time Jax test on missing-domain + company-size leads</li>
+                <li><strong>Sep 16</strong> — CS Drop sync: company-size Q + Braze / website / platform</li>
+                <li><strong>Sep 16</strong> — Airtable dash: $300K pipe · $36.3K ARR</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- Contact Sales drop -->
+        <section class="subject" data-id="cs-drop">
+          <span class="tag">01 · Contact Sales drop</span>
+          <h2>Contact Sales volume drop</h2>
+          <p class="lede">Past month from #contact-sales-aug-drop, Guardians, and ToFu. Gradual YoY/MoM decline under investigation - not a mid-August cliff once Airtable dump is excluded. Website and Platform both soft.</p>
+          <div class="stat-row">
+            <div class="stat">
+              <div class="val">−29%</div>
+              <div class="lbl">Platform CS lift in onboarding A/B variant (company-size Q removed)</div>
+            </div>
+            <div class="stat">
+              <div class="val">Website ↓</div>
+              <div class="lbl">Natali: Website CS also down (not hit by signup Q). Most opp soft from Website; some Platform; LP CS up</div>
+            </div>
+            <div class="stat">
+              <div class="val">M0 flat</div>
+              <div class="lbl">Ori: new business ARR / M0 pipe not hit - drop skewed lower-tier</div>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Website drop (parallel to Platform)</h3>
+            <ul>
+              <li>Website CS is down even though signup-question removal does not touch Website placements - so SU Q alone cannot explain the full drop.</li>
+              <li>Opp soft is mostly Website, some Platform; newer Landing Page CS placement is up.</li>
+              <li><strong>Sep 16 workstream:</strong> Review website experiments / changes → Shira Lazar + Barak Bengad.</li>
+            </ul>
+          </div>
+          <div class="card" style="margin-top:14px">
+            <h3>Actions / owners (Sep 16 sync)</h3>
+            <ul>
+              <li><strong>Revert (partial):</strong> Re-add company-size Q into solution-based onboarding (not full revert). Open: which exact screen.</li>
+              <li><strong>Braze:</strong> What’s driving drop unrelated to signup Q → Tomer Perlman + Gilad</li>
+              <li><strong>Website:</strong> Experiments / changes → Shira Lazar + Barak Bengad</li>
+              <li><strong>Platform placements:</strong> Pricing, end of trial, raise + spend mix with Marketing → Natali Raskin</li>
+              <li><strong>Tomer K:</strong> Treat as business issue - Aug new pipe decline; don’t wait past holidays to decide</li>
+            </ul>
+          </div>
+          <div class="card" style="margin-top:14px">
+            <h3>Related ops issue (Gilad, Sep 14)</h3>
+            <ul>
+              <li><code>CS_AI_Analyzer__c</code> Error on every Contact Sales lead since Aug 28. Sep 1–14: 2,180 CS leads, 0 successful Sales/Support/Unknown classes.</li>
+              <li>Error rate ramp: 0.8% Jun → 2.1% Jul → 20.5% Aug → 75.6% Sep (looks like capacity/quota, not one-day break).</li>
+              <li>Impact: ~2,018 leads unclassed; Support spilling to sales (1.5% → 7.2%); Book a Meeting eligible ~973 Jun vs 24 Sep.</li>
+              <li>Escalated to Barak / Adi Mazon / Oded - value arrives from HubSpot API, not written by SF.</li>
+            </ul>
+          </div>
+          <div class="card" style="margin-top:14px">
+            <h3>NAM ToFu signal (weekly bots)</h3>
+            <ul>
+              <li>CS volume still ~−26% to −41% YoY depending on week; Website CS and Platform both soft.</li>
+              <li>Meeting→qualified compression called out in Products / SMB in early Sep weeks.</li>
+              <li>~2h HubSpot→SF outage Sep 10 (IT deactivated API Hubspot user) - delay only, ~25–30 CS leads, fixed same day.</li>
+            </ul>
+          </div>
+          <div class="ask">
+            <strong>ASK OF YOU</strong>
+            <p>Align on re-adding company-size Q (which screen) + whether Funnel owns Braze investigation with Tomer. Flag CS AI Analyzer as P0 until Error rate is back to normal.</p>
+          </div>
+        </section>
+
+        <!-- Airtable -->
+        <section class="subject" data-id="airtable">
+          <span class="tag">02 · Airtable</span>
+          <h2>Airtable Campaign</h2>
+          <p class="lede">Primary workstream while you were OOO. Now in maintenance mode. Ops board + monitoring dash live. Metrics below from Airtable Campaign Monitoring (Overview, &lt;20 employees excluded).</p>
+          <div class="stat-row">
+            <div class="stat">
+              <div class="val">$300K</div>
+              <div class="lbl">Pipeline generated · Inbound + Sales-led cohorts</div>
+            </div>
+            <div class="stat">
+              <div class="val">$36.3K</div>
+              <div class="lbl">Total ARR · Won $10.4K + Added no-touch $25.9K</div>
+            </div>
+            <div class="stat">
+              <div class="val">23</div>
+              <div class="lbl">Opportunities created · Inbound + Sales-led</div>
+            </div>
+          </div>
+          <div class="stat-row" style="margin-top:10px">
+            <div class="stat">
+              <div class="val">40</div>
+              <div class="lbl">Inbound leads · Airtable Campaign cohort (Contact Sales)</div>
+            </div>
+            <div class="stat">
+              <div class="val">2,739</div>
+              <div class="lbl">Sales-led outbound · Unqualified + Lost Ops + ZI Intent + Outreach</div>
+            </div>
+            <div class="stat">
+              <div class="val">85 / 58</div>
+              <div class="lbl">Meetings booked / completed · Inbound + Sales-led</div>
+            </div>
+          </div>
+          <div class="grid-2" style="margin-top:14px">
+            <div class="card">
+              <h3>What shipped</h3>
+              <ul>
+                <li>Ops board as source of truth</li>
+                <li>Chili Piper owner = SF lead owner <span class="pill done">Done</span></li>
+                <li>Existing lists reissued · EMEA list QA <span class="pill done">Done</span></li>
+                <li>Dashboards (dual view, coverage, Gong, Monitoring Overview)</li>
+                <li>Attempt-rate push + bounce pre-validate <span class="pill done">Done</span></li>
+                <li>First displacement opp &gt;$100K · Mendocino Farms Expansion · Sep 16 ($113.7K)</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>Attribution next</h3>
+              <ul>
+                <li>Lead Classification board live (with Ytal)</li>
+                <li>Round 1 review: me + True + Shai</li>
+                <li>Then stamp chosen opps into SF campaign attribution</li>
+                <li>Signal FAQ: leaving / lost_to / mentioned_only</li>
+              </ul>
+            </div>
+          </div>
+          <div class="ask">
+            <strong>ASK OF YOU</strong>
+            <p>Airtable next-month focus: campaign is in maintenance right now. Confirm that is the right posture (monitor + attribution Round 1 only) vs spinning capacity back up.</p>
+          </div>
+        </section>
+
+        <!-- No-touch 1:1 Agent -->
+        <section class="subject" data-id="no-touch">
+          <span class="tag">03 · No-touch 1:1 Agent</span>
+          <h2>No-touch 1:1 Agent</h2>
+          <p class="lede">From #no-touch-nurture-agent. Goal: convert raw / no-touch signups trial → pay via Jax (Agent OS), without SF sales ownership.</p>
+          <div class="stat-row">
+            <div class="stat">
+              <div class="val">~35K</div>
+              <div class="lbl">Low company-size signups / month (Yaniv POC segment pick)</div>
+            </div>
+            <div class="stat">
+              <div class="val">1–19</div>
+              <div class="lbl">Proposed POC audience · no-touch / low company size</div>
+            </div>
+            <div class="stat">
+              <div class="val">NAM</div>
+              <div class="lbl">Regional pilot first · measure cost, noise, conversion</div>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <h3>What we aligned</h3>
+              <ul>
+                <li>Audience converging on <strong>low company size</strong> (Yaniv artifact Sep 6; Gilad + Inbal agree). Missing-domain is phase 2.</li>
+                <li>Leads live as <strong>Raw Signup</strong> in SF. Agent OS assign only (Natasha/Jax) - not SF owner.</li>
+                <li>Two gates: cleanup (<code>Signup_Cleanup_Reason__c</code>) vs distribution (<code>Not_Relevant_For_Distribution__c</code>). POC filters on gate 2 (low company size) - Shir Berson Sep 10.</li>
+                <li>Jax already lifts activation vs untouched trials; gap is activation → purchase (knowledge + tools) - Raz readout Sep 6.</li>
+                <li>Won criteria for this motion = payment / conversion rate, not meeting.</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>Updates from the channel</h3>
+              <ul>
+                <li><strong>Sep 7 AIs:</strong> NAM pilot · FY27 workshop Oct/Nov · fix SF routing thresholds · document no-touch journey · lifecycle email suppression with Jax.</li>
+                <li><strong>Sep 7:</strong> Agent OS assignment plan posted (Gilad) after Ido + Roni sessions.</li>
+                <li><strong>Sep 8:</strong> Raz intro’d Sable for agentic demo flows (Inbal / Yaniv).</li>
+                <li><strong>Sep 10:</strong> Shir clarified cleanup vs distribution gates + A/B field questions for Raz.</li>
+                <li><strong>Sep 16:</strong> Inbal writing comprehensive starting doc; walkthrough next week with Raz / Gilad / Alex.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="ask">
+            <strong>ASK OF YOU</strong>
+            <p>Approve the POC will be 1–19 no-touch.</p>
+          </div>
+        </section>
+
+        <!-- Eva -->
+        <section class="subject" data-id="eva">
+          <span class="tag">04 · Eva for Elevate</span>
+          <h2>Events agent for Elevate</h2>
+          <p class="lede">From #eva-nurture-agent. Post-event AI agent. Target Elevate <strong>Oct 28, 2026</strong>. Channel opened Sep 8 with Raz.</p>
+          <div class="grid-2">
+            <div class="card">
+              <h3>What Eva does</h3>
+              <ul>
+                <li>Feedback → sales intent → qualify / book meetings</li>
+                <li>Phone + email · 5 business-day chase</li>
+                <li>Same Amanda anti-spam policies</li>
+                <li>~2,500 leads · drip batches of 100–500</li>
+                <li>Service account: eva.ag@monday.com</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>Decisions locked (Sep 16)</h3>
+              <ul>
+                <li>Eva does feedback + qualification herself</li>
+                <li><strong>No handoff to Amanda</strong> on the live call</li>
+                <li>No sales intent → unqualify in SF</li>
+                <li>Qualified → CS form via n8n, outside Amanda/Jax</li>
+              </ul>
+            </div>
+          </div>
+          <div class="grid-2" style="margin-top:14px">
+            <div class="card">
+              <h3>Already done</h3>
+              <ul>
+                <li>Prior 11Labs system prompt shared</li>
+                <li>Knowledge base shared (eve-elevate-knowledge)</li>
+                <li>Architecture + Elevate prep summary posted</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>Milestones</h3>
+              <ul>
+                <li><strong>Next week</strong> — basic version + test call (Gilad + Raz)</li>
+                <li><strong>~2 weeks</strong> — E2E + present to Elevate team</li>
+                <li><strong>Oct 28</strong> — Elevate live / production</li>
+              </ul>
+            </div>
+          </div>
+          <div class="card" style="margin-top:14px">
+            <h3>Ownership</h3>
+            <ul>
+              <li><strong>Gilad</strong> — CS Form tool + n8n, session knowledge gap, IT access for Eva, SF batch release, share 11Labs feedback instructions</li>
+              <li><strong>Raz</strong> — ADL, Moshe on load, wire SF fields + KB + n8n, test call</li>
+              <li><strong>Adar</strong> — initial 11Labs agent from feedback prompt</li>
+            </ul>
+          </div>
+          <div class="ask">
+            <strong>ASK OF YOU</strong>
+            <p>Confirm this stays a Funnel priority toward Elevate Oct 28.</p>
+          </div>
+        </section>
+
+        <!-- CRM Migrations -->
+        <section class="subject" data-id="crm-migrations">
+          <span class="tag">06 · CRM Migrations</span>
+          <h2>CRM Migrations</h2>
+          <p class="lede">Internal monday CRM transition - sellers move to monday CRM as system of action. From #mondaycrm-ai-ops-transition-forum + MarkOps / leadership meetings this month.</p>
+
+          <div class="grid-2">
+            <div class="card">
+              <h3>What this is</h3>
+              <p>Move commercial lead + sales day-to-day onto monday CRM. Salesforce stays System of Record (and CPQ for now). HubSpot stays Marketing CRM short-term. Gradual - not a flip on one day.</p>
+            </div>
+            <div class="card">
+              <h3>Leadership ask (Sep 15)</h3>
+              <p>Cross-org deck for Eran / Roy / Ari / Yaron on end-to-end lead flow. Partner joining to design/build monday CRM as sellers’ system of action. MarkOps owned the sales-and-leads slide (Gilad + Rotem).</p>
+            </div>
+            <div class="card">
+              <h3>MarkOps short-term plan</h3>
+              <p>Keep existing HubSpot account: dedicated CRM forms, nurture, scoring. Don’t stand up a second HubSpot yet. CRM Campaign product not ready - still need HubSpot between MQL and SQL. HubSpot freelancer to help build nurture/automations.</p>
+            </div>
+            <div class="card">
+              <h3>Lead flow target</h3>
+              <p>Raw leads land in monday CRM before heavy filtering. Related leads included. Mirror / dogfood path from HubSpot → monday CRM so we can test what breaks without tanking the main funnel. Continuous sync monday CRM ↔ SF still open.</p>
+            </div>
+            <div class="card">
+              <h3>Milestones</h3>
+              <p>Milestone 1 = Blender removal + multi-identity staging proof. Milestone 2 = lifecycle autonomy. Milestone 3 = CRM dogfooding (partner + scope after leadership). Oct 15 called as a near gate; dogfood push toward EOY / into 2027.</p>
+            </div>
+            <div class="card">
+              <h3>Open this week</h3>
+              <ul>
+                <li>Ksenia: brainstorm MarkOps + RevOps analytics on lead creation, sync, “CRM leads not filtered like regular leads”</li>
+                <li>Partner choice + onboarding (Ron Kimhi)</li>
+                <li>New CRM.ai email domain warm-up / Email Marketing owner</li>
+                <li>CRM-specific lead scoring + Contact Sales form path (in flight)</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="ask">
+            <strong>ASK OF YOU</strong>
+            <p>Confirm MarkOps capacity / ownership on lead-flow + HubSpot short-term path for the CRM transition, and who signs the C-level decisions from the Sep 15 leadership meeting.</p>
+          </div>
+        </section>
+
+        <!-- Mid-Funnel Updates -->
+        <section class="subject" data-id="mid-funnel">
+          <span class="tag">07 · Mid-Funnel Updates</span>
+          <h2>Mid-Funnel Updates</h2>
+          <p class="lede">Undistributed / cleaned-up signups → Jax &amp; no-touch. From Sep 7 workshop + APJ private-email DM.</p>
+
+          <div class="grid-2">
+            <div class="card">
+              <h3>The opportunity</h3>
+              <p>Most signups never reach a human or Jax. Cleanup + low score leave a huge ownerless pool. Upside called at $30–50M on untouched leads - not squeezing top-tier more.</p>
+            </div>
+            <div class="card">
+              <h3>Low company size POC</h3>
+              <p>First pilot = low company size → Salesforce → controlled no-touch (not to sales). Audience stays locked so we can measure cleanly. Scale other segments only after this works.</p>
+            </div>
+            <div class="card">
+              <h3>Convert to pay, not meetings</h3>
+              <p>Goal is payment. Hand to sales / Jax / Amanda only when sales intent shows. Don’t dump volume to Jax until that journey is proven - meeting spam creates rep noise.</p>
+            </div>
+            <div class="card">
+              <h3>Lifecycle email conflict</h3>
+              <p>Jax-owned leads still get onboarding emails (up to ~7/day). Need suppression when Jax or a rep owns the lead.</p>
+            </div>
+            <div class="card">
+              <h3>APJ private emails (Gmail)</h3>
+              <p>~68% of APJ signups stop as personal email / missing domain. Eric sizes ~$367K missed ARR. Jax barely covers APJ today (ANZ only). Sep 17 plan: one-time Jax test on missing domain + company size (not the full dump).</p>
+            </div>
+            <div class="card">
+              <h3>Who owns what</h3>
+              <ul>
+                <li>Population / analysis → Tomer</li>
+                <li>SF / tech check → Shir</li>
+                <li>Journey test → Gilad + Yael</li>
+                <li>Tracking DB → Tom Barda</li>
+                <li>Field / APJ → Eric</li>
+                <li>No-touch journey + email suppress → Inbal / Raz / Gilad</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="ask">
+            <strong>ASK OF YOU</strong>
+            <p>Confirm Funnel stays on the Jax one-time APJ POC (missing domain + company size), and RevAI sign-off before any standing routing change.</p>
+          </div>
+        </section>
+
+        <!-- FDE -->
+        <section class="subject" data-id="fde">
+          <span class="tag">08 · FDE</span>
+          <h2>FDE Contact Sales motion</h2>
+          <p class="lede">Out of my scope now.</p>
+          <div class="card">
+            <h3>Status</h3>
+            <ul>
+              <li>Initial kickoffs done (UTM / ad_group routing values, ops board, #fde-contact-sales-campaign).</li>
+              <li>Ownership moved to <strong>Deborah</strong>.</li>
+            </ul>
+          </div>
+        </section>
+
+        <div class="footer-nav">
+          <button type="button" id="prevBtn">← Prev</button>
+          <span class="progress" id="progress">1 / 8</span>
+          <button type="button" id="nextBtn">Next →</button>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var subjects = [
+        { id: "overview", label: "Overview" },
+        { id: "cs-drop", label: "Contact Sales drop" },
+        { id: "airtable", label: "Airtable" },
+        { id: "no-touch", label: "No-touch 1:1 Agent" },
+        { id: "eva", label: "Eva for Elevate" },
+        { id: "crm-migrations", label: "CRM Migrations" },
+        { id: "mid-funnel", label: "Mid-Funnel Updates" },
+        { id: "fde", label: "FDE Motion" }
+      ];
+
+      var index = 0;
+      var nav = document.getElementById("nav");
+      var sections = Array.prototype.slice.call(document.querySelectorAll(".subject"));
+      var prevBtn = document.getElementById("prevBtn");
+      var nextBtn = document.getElementById("nextBtn");
+      var progress = document.getElementById("progress");
+
+      subjects.forEach(function (s, i) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.innerHTML = '<span class="num">' + (i + 1) + "</span>" + s.label;
+        btn.dataset.index = String(i);
+        btn.addEventListener("click", function () { show(i); });
+        nav.appendChild(btn);
+      });
+
+      function show(i) {
+        if (i < 0 || i >= subjects.length) return;
+        index = i;
+        sections.forEach(function (el, j) {
+          el.classList.toggle("active", j === index);
+        });
+        Array.prototype.forEach.call(nav.children, function (btn, j) {
+          btn.classList.toggle("active", j === index);
+        });
+        progress.textContent = (index + 1) + " / " + subjects.length;
+        prevBtn.disabled = index === 0;
+        nextBtn.disabled = index === subjects.length - 1;
+        history.replaceState(null, "", "#" + subjects[index].id);
+      }
+
+      prevBtn.addEventListener("click", function () { show(index - 1); });
+      nextBtn.addEventListener("click", function () { show(index + 1); });
+
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowRight" || e.key === " ") {
+          e.preventDefault();
+          show(index + 1);
+        } else if (e.key === "ArrowLeft") {
+          e.preventDefault();
+          show(index - 1);
+        }
+      });
+
+      var hash = (location.hash || "").replace("#", "");
+      var start = subjects.findIndex(function (s) { return s.id === hash; });
+      show(start >= 0 ? start : 0);
+    })();
+  </script>
+</body>
+</html>
